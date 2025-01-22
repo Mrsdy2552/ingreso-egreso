@@ -5,18 +5,61 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from '@angular/fire/auth';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
-import { doc, Firestore, setDoc } from '@angular/fire/firestore';
+import { doc, docData, Firestore, setDoc } from '@angular/fire/firestore';
+import { Store } from '@ngrx/store';
+import { AppState } from '../app.reducex';
+import * as authAction from '../auth/auth.action';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private auth: Auth, private firestore: Firestore) {}
+  authSubscription: any;
+  firestoreSubscription: any;
+  constructor(
+    private auth: Auth,
+    private firestore: Firestore,
+    private store: Store<AppState>
+  ) {}
 
-  initAuthListener(): Observable<any> {
-    return authState(this.auth);
+  private userSubject = new BehaviorSubject<Usuario | null>(null);
+  public user$: Observable<Usuario | null> = this.userSubject.asObservable();
+
+  initAuthListener(): void {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+
+    this.authSubscription = authState(this.auth).subscribe((fuser) => {
+      if (fuser) {
+        const userDocRef = doc(this.firestore, `usuarios/${fuser.uid}`);
+
+        if (this.firestoreSubscription) {
+          this.firestoreSubscription.unsubscribe();
+        }
+
+        this.firestoreSubscription = docData(userDocRef).subscribe(
+          (firestoreUser: any) => {
+            if (firestoreUser) {
+              console.log(firestoreUser);
+
+              const user = Usuario.fromFirebase(firestoreUser);
+              this.userSubject.next(user); // Actualiza el BehaviorSubject
+              this.store.dispatch(authAction.setUser({ user }));
+            }
+          },
+          (error) => console.error('Error al obtener datos del usuario:', error)
+        );
+      } else {
+        this.userSubject.next(null); // Usuario no autenticado
+        this.store.dispatch(authAction.unSetUser());
+        if (this.firestoreSubscription) {
+          this.firestoreSubscription.unsubscribe();
+        }
+      }
+    });
   }
 
   crearUsuario(nombre: string, email: string, password: string) {

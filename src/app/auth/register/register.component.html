@@ -17,9 +17,7 @@
             </div>
             <div class="form-group">
               <div class="input-group">
-                <input type="email" 
-                formControlName="correo"
-                class="form-control" placeholder="Correo">
+                <input type="email" formControlName="correo" class="form-control" placeholder="Correo">
                 <div class="input-group-append">
                   <span class="input-group-text">
                     <i class="fa fa-check-circle"></i>
@@ -29,9 +27,7 @@
             </div>
             <div class="form-group">
               <div class="input-group">
-                <input type="password"
-                formControlName="password"
-                class="form-control" placeholder="Password">
+                <input type="password" formControlName="password" class="form-control" placeholder="Password">
                 <div class="input-group-append">
                   <span class="input-group-text">
                     <i class="fa fa-check-circle"></i>
@@ -41,10 +37,16 @@
             </div>
 
             <div class="form-group">
-              <button type="submit"
-              [disabled]="fromGrup.invalid"
-              
-              class="btn btn-primary submit-btn btn-block">Crear cuenta</button>
+              @if (!cargando) {
+              <button type="submit" [disabled]="fromGrup.invalid" class="btn btn-primary submit-btn btn-block">Crear
+                cuenta</button>
+              }
+              @if (cargando) {
+
+              <button class="btn btn-primary submit-btn btn-block" [disabled]="true">
+                <i class="fa fa-spin fa-sync"></i>
+                Espere ...</button>
+              }
             </div>
             <div class="text-block text-center my-3">
               <span class="text-small font-weight-semibold">ya tienes una cuenta?</span>

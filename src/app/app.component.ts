@@ -10,14 +10,11 @@ import { AuthService } from './services/auth.service';
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
-  constructor(private aunt: AuthService) {}
+  constructor(private authService: AuthService) {}
   ngOnInit(): void {
-    this.aunt.initAuthListener().subscribe((user) => {
-      if (user) {
-        console.log('Usuario autenticado:', user.email);
-        console.log('Usuario autenticado:', user.uid);
-      } 
-    });
+    this.authService.initAuthListener();
+
+    this.authService.user$.subscribe((user) => {});
   }
   title = 'ingreso-egreso';
 }
