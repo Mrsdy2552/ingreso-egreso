@@ -11,6 +11,7 @@ import { doc, docData, Firestore, setDoc } from '@angular/fire/firestore';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app.reducex';
 import * as authAction from '../auth/auth.action';
+import * as ingresoEgresoAction from '../ingreso-egreso/ingresoEgreso.action';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,11 @@ export class AuthService {
 
   private userSubject = new BehaviorSubject<Usuario | null>(null);
   public user$: Observable<Usuario | null> = this.userSubject.asObservable();
+  private _user: Usuario | null = null;
+
+  get user() {
+    return { ...this._user };
+  }
 
   initAuthListener(): void {
     if (this.authSubscription) {
@@ -43,18 +49,20 @@ export class AuthService {
         this.firestoreSubscription = docData(userDocRef).subscribe(
           (firestoreUser: any) => {
             if (firestoreUser) {
-              console.log(firestoreUser);
-
               const user = Usuario.fromFirebase(firestoreUser);
+              this._user = user;
               this.userSubject.next(user); // Actualiza el BehaviorSubject
-              this.store.dispatch(authAction.setUser({ user }));
+              
+              this.store.dispatch(authAction.setUser({ user })); 
             }
           },
           (error) => console.error('Error al obtener datos del usuario:', error)
         );
       } else {
+        this._user = null;
         this.userSubject.next(null); // Usuario no autenticado
         this.store.dispatch(authAction.unSetUser());
+        this.store.dispatch(ingresoEgresoAction.unSetItems());
         if (this.firestoreSubscription) {
           this.firestoreSubscription.unsubscribe();
         }
