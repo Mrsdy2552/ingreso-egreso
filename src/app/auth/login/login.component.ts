@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       password: ['', Validators.required],
     });
 
-    this.uiSubscription =  this.store.select('ui').subscribe((ui) => {
+    this.uiSubscription = this.store.select('ui').subscribe((ui) => {
       this.cargando = ui.isLoading;
       console.log('cargando subs', this.cargando);
     });
@@ -47,13 +47,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.uiSubscription.unsubscribe();
   }
   loginUsuario() {
-    // Swal.fire({
-    //   title: 'espere por favor...',
-    //   willOpen: () => {
-    //     Swal.showLoading();
-    //   },
-    // });
-
     if (this.loginFrom.valid) {
       this.store.dispatch(ui.isLoading());
 
